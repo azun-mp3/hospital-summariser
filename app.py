@@ -70,17 +70,19 @@ elif mode == "Chat":
             )
 
     # Chat input box
-    user_input = st.text_input("💬 Ask a question or refine the summary:", key="chat_input")
-    if st.button("Send"):
-        if user_input.strip():
-            st.session_state.chat_history.append({"role": "user", "content": user_input})
+    with st.form(key="chat_form", clear_on_submit=True):
+        user_input = st.text_input("💬 Ask a question or refine the summary:", key="chat_input")
+        submit_button = st.form_submit_button("Send")
 
-            with st.spinner("Thinking..."):
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=st.session_state.chat_history
-                )
-                reply = response.choices[0].message.content.strip()
-                st.session_state.chat_history.append({"role": "assistant", "content": reply})
+    if submit_button and user_input.strip():
+        st.session_state.chat_history.append({"role": "user", "content": user_input})
 
-            st.experimental_rerun()  # Refresh to show new bubbles
+    with st.spinner("Thinking..."):
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a helpful medical assistant."}
+            ] + st.session_state.chat_history
+        )
+        reply = response.choices[0].message.content.strip()
+        st.session_state.chat_history.append({"role": "assistant", "content": reply})
