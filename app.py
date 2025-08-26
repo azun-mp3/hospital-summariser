@@ -32,14 +32,18 @@ if mode == "Summarise":
             )
 
             with st.spinner("Summarising..."):
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[{"role": "user", "content": prompt}],
-                )
-                summary = response.choices[0].message.content.strip()
-                st.session_state.last_summary = summary
-                st.success("✅ Summary generated:")
-                st.write(summary)
+                try:
+                    response = client.chat.completions.create(
+                        model="gpt-3.5-turbo",  # use free API model
+                        messages=[{"role": "user", "content": prompt}],
+                        temperature=0.3
+                    )
+                    summary = response.choices[0].message.content.strip()
+                    st.session_state.last_summary = summary
+                    st.success("✅ Summary generated:")
+                    st.write(summary)
+                except Exception as e:
+                    st.error(f"❌ An error occurred: {e}")
         else:
             st.warning("⚠️ Please paste a hospital course first.")
 
@@ -48,7 +52,6 @@ elif mode == "Chat":
     # Clear chat button
     if st.button("🗑️ Clear Chat"):
         st.session_state.chat_history = []
-        st.experimental_rerun()
 
     # Auto-insert last summary if chat is empty
     if st.session_state.last_summary and not st.session_state.chat_history:
@@ -69,7 +72,7 @@ elif mode == "Chat":
                 unsafe_allow_html=True,
             )
 
-    # Chat input box
+    # Chat input box using a form
     with st.form(key="chat_form", clear_on_submit=True):
         user_input = st.text_input("💬 Ask a question or refine the summary:", key="chat_input")
         submit_button = st.form_submit_button("Send")
@@ -77,12 +80,14 @@ elif mode == "Chat":
     if submit_button and user_input.strip():
         st.session_state.chat_history.append({"role": "user", "content": user_input})
 
-    with st.spinner("Thinking..."):
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a helpful medical assistant."}
-            ] + st.session_state.chat_history
-        )
-        reply = response.choices[0].message.content.strip()
-        st.session_state.chat_history.append({"role": "assistant", "content": reply})
+        with st.spinner("Thinking..."):
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",  # free API model
+                    messages=[{"role": "system", "content": "You are a helpful medical assistant."}] + st.session_state.chat_history,
+                    temperature=0.3
+                )
+                reply = response.choices[0].message.content.strip()
+                st.session_state.chat_history.append({"role": "assistant", "content": reply})
+            except Exception as e:
+                st.error(f"❌ An error occurred: {e}")
