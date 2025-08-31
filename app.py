@@ -1,7 +1,7 @@
 import ollama
 import streamlit as st
 
-st.title("🏥 Hospital Course Summariser (LLaMA 3 via Ollama)")
+st.title("🏥 Hospital Course Summariser ")
 
 hospital_course = st.text_area("Hospital Course", height=300)
 
