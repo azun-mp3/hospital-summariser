@@ -5,7 +5,7 @@ from groq import Groq
 # Get API key from environment
 api_key = os.environ.get("GROQ_API_KEY")
 
-st.title("🏥 Hospital Course Summariser (LLaMA 3 via Groq API)")
+st.title("🏥 Hospital Course Summariser")
 
 if not api_key:
     st.error("⚠️ GROQ_API_KEY is not set. Please add it in your Streamlit Cloud secrets.")
